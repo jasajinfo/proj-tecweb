@@ -2,79 +2,121 @@
 <html lang="pt-br">
 
 <head>
-    <title>Consulta - Gerenciador de Calçados</title>
+    <title>Consultar Calçado</title>
     <meta charset="utf-8">
-    <script src="js/js37.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <script type="text/javascript" src="js/js-av2.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        h1 {
-            color: #333;
-            text-align: center;
+        #resultado {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
         }
 
         .card {
-            background: #f8f9fa;
-            padding: 20px;
+            background-color: white;
             border-radius: 5px;
-            margin-top: 20px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .card p {
-            margin: 8px 0;
-        }
-
-        .card strong {
-            display: inline-block;
-            width: 120px;
-        }
-
-        .button-group {
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        button {
-            padding: 10px 20px;
-            background: #6c757d;
-            color: white;
-            border: none;
+        .error {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            padding: 10px;
             border-radius: 4px;
-            cursor: pointer;
+        }
+
+        .success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            padding: 10px;
+            border-radius: 4px;
         }
     </style>
 </head>
 
 <body>
-    <h1>Detalhes do Calçado</h1>
+    <div class="container">
+        <header>
+            <h1>Consulta de Calçado</h1>
+        </header>
+        <main>
+            <form id="form-consulta" onsubmit="return false;">
+                <div class="form-group">
+                    <label for="codigo-calcado">Código do Calçado:</label>
+                    <input id="codigo-calcado" class="form-input" type="text" placeholder="Digite o código" required
+                        autofocus>
+                </div>
 
-    <div id="dadosCalcado" class="card"></div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" type="button" onclick="history.back()">Retornar</button>
+                    <button class="btn btn-primary" type="button" onclick="consultarCalcado()">Consultar</button>
+                </div>
+            </form>
 
-    <div class="button-group">
-        <button onclick="window.location.href='menu.html'">Voltar ao Menu</button>
+            <div id="resultado"></div>
+        </main>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const calcado = new Calcado().obterDados();
-            const card = document.getElementById('dadosCalcado');
+    <script type="text/javascript">
+        function consultarCalcado() {
+            const codigoInput = document.getElementById('codigo-calcado');
+            const codigo = codigoInput.value.trim();
+            const resultadoDiv = document.getElementById('resultado');
+            resultadoDiv.innerHTML = ''; 
 
-            if (calcado.codigo) {
-                card.innerHTML = `
-                    <p><strong>Código:</strong> ${calcado.codigo}</p>
-                    <p><strong>Modelo:</strong> ${calcado.modelo}</p>
-                    <p><strong>Cor:</strong> ${calcado.cor}</p>
-                    <p><strong>Tamanho:</strong> ${calcado.tamanho}</p>
-                    <p><strong>Estoque:</strong> ${calcado.quantidade}</p>
+            try {
+                const calcado = new Calcado();
+                const dadosCalcado = calcado.consultarCalcado(); 
+
+                if (!dadosCalcado || !dadosCalcado.codigo) { 
+                    throw new Error('Nenhum calçado cadastrado no sistema.');
+                }
+
+                if (codigo && codigo !== dadosCalcado.codigo) {
+                    throw new Error(`Calçado com o código "${codigo}" não encontrado. O código cadastrado é: ${dadosCalcado.codigo}`);
+                }
+
+                
+                if (!codigo && dadosCalcado.codigo) {
+                    
+                } else if (codigo && codigo === dadosCalcado.codigo) {
+                    
+                } else {
+                    throw new Error('Nenhum calçado correspondente encontrado.');
+                }
+
+                resultadoDiv.innerHTML = `
+                    <div class="card success">
+                        <h3>Dados do Calçado</h3>
+                        <p><strong>Código:</strong> ${dadosCalcado.codigo}</p>
+                        <p><strong>Modelo:</strong> ${dadosCalcado.modelo}</p>
+                        <p><strong>Cor:</strong> ${dadosCalcado.cor}</p>
+                        <p><strong>Tamanho:</strong> ${dadosCalcado.tamanho}</p>
+                        <p><strong>Estoque disponível:</strong> ${dadosCalcado.quantidade}</p>
+                    </div>
                 `;
-            } else {
-                card.innerHTML = '<p>Nenhum calçado cadastrado</p>';
+
+            } catch (error) {
+                resultadoDiv.innerHTML = `
+                    <div class="error">
+                        <p><strong>Erro na consulta:</strong></p>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+                console.error("Erro na consulta:", error);
             }
+        }
+
+        
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('codigo-calcado').focus();
         });
     </script>
 </body>
